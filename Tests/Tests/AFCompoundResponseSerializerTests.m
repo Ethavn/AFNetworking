@@ -47,7 +47,7 @@
     AFJSONResponseSerializer *jsonSerializer = [AFJSONResponseSerializer serializer];
     AFCompoundResponseSerializer *compoundSerializer = [AFCompoundResponseSerializer compoundSerializerWithResponseSerializers:@[imageSerializer, jsonSerializer]];
 
-    NSData *data = [NSJSONSerialization dataWithJSONObject:@{@"key":@"value"} options:0 error:nil];
+    NSData *data = [NSJSONSerialization dataWithJSONObject:@{@"key":@"value"} options:(NSJSONWritingOptions)0 error:nil];
     NSURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://test.com"]
                                                           statusCode:200
                                                          HTTPVersion:@"1.1"
@@ -64,12 +64,17 @@
     AFImageResponseSerializer *imageSerializer = [AFImageResponseSerializer serializer];
     AFJSONResponseSerializer *jsonSerializer = [AFJSONResponseSerializer serializer];
     AFCompoundResponseSerializer *compoundSerializer = [AFCompoundResponseSerializer compoundSerializerWithResponseSerializers:@[imageSerializer, jsonSerializer]];
+    [compoundSerializer setAcceptableStatusCodes:[NSIndexSet indexSetWithIndex:100]];
+    [compoundSerializer setAcceptableContentTypes:[NSSet setWithObject:@"test/type"]];
 
     AFCompoundResponseSerializer *copiedSerializer = [compoundSerializer copy];
+    XCTAssertNotNil(copiedSerializer);
     XCTAssertNotEqual(compoundSerializer, copiedSerializer);
     XCTAssertTrue(compoundSerializer.responseSerializers.count == copiedSerializer.responseSerializers.count);
-    XCTAssertTrue([NSStringFromClass([[copiedSerializer.responseSerializers objectAtIndex:0] class]) isEqualToString:NSStringFromClass([AFImageResponseSerializer class])]);
-    XCTAssertTrue([NSStringFromClass([[copiedSerializer.responseSerializers objectAtIndex:1] class]) isEqualToString:NSStringFromClass([AFJSONResponseSerializer class])]);
+    XCTAssertTrue([NSStringFromClass([copiedSerializer.responseSerializers[0] class]) isEqualToString:NSStringFromClass([AFImageResponseSerializer class])]);
+    XCTAssertTrue([NSStringFromClass([copiedSerializer.responseSerializers[1] class]) isEqualToString:NSStringFromClass([AFJSONResponseSerializer class])]);
+    XCTAssertEqual(compoundSerializer.acceptableStatusCodes, copiedSerializer.acceptableStatusCodes);
+    XCTAssertEqual(compoundSerializer.acceptableContentTypes, copiedSerializer.acceptableContentTypes);
 }
 
 - (void)testCompoundSerializerCanBeArchivedAndUnarchived {
@@ -82,8 +87,8 @@
     XCTAssertNotNil(unarchivedSerializer);
     XCTAssertNotEqual(unarchivedSerializer, compoundSerializer);
     XCTAssertTrue(compoundSerializer.responseSerializers.count == compoundSerializer.responseSerializers.count);
-    XCTAssertTrue([NSStringFromClass([[unarchivedSerializer.responseSerializers objectAtIndex:0] class]) isEqualToString:NSStringFromClass([AFImageResponseSerializer class])]);
-    XCTAssertTrue([NSStringFromClass([[unarchivedSerializer.responseSerializers objectAtIndex:1] class]) isEqualToString:NSStringFromClass([AFJSONResponseSerializer class])]);
+    XCTAssertTrue([NSStringFromClass([unarchivedSerializer.responseSerializers[0] class]) isEqualToString:NSStringFromClass([AFImageResponseSerializer class])]);
+    XCTAssertTrue([NSStringFromClass([unarchivedSerializer.responseSerializers[1] class]) isEqualToString:NSStringFromClass([AFJSONResponseSerializer class])]);
 }
 
 @end

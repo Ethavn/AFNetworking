@@ -46,7 +46,8 @@
     [super tearDown];
     self.networkActivityIndicatorManager = nil;
 
-    [self.sessionManager invalidateSessionCancelingTasks:YES];
+    [self.sessionManager invalidateSessionCancelingTasks:YES resetSession:NO];
+    self.sessionManager = nil;
 }
 
 #pragma mark -
@@ -69,12 +70,13 @@
     [self.sessionManager
      GET:@"/delay/1"
      parameters:nil
+     headers:nil
      progress:nil
      success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
          [requestExpectation fulfill];
      }
      failure:nil];
-    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
+    [self waitForExpectationsWithCommonTimeout];
 }
 
 - (void)testThatNetworkActivityIndicatorTurnsOnAndOffIndicatorWhenRequestFails {
@@ -95,12 +97,13 @@
     [self.sessionManager
      GET:@"/status/404"
      parameters:nil
+     headers:nil
      progress:nil
      success:nil
      failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
          [requestExpectation fulfill];
      }];
-    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
+    [self waitForExpectationsWithCommonTimeout];
 }
 
 - (void)testThatVisibilityDelaysAreApplied {
@@ -128,13 +131,14 @@
     [self.sessionManager
      GET:@"/delay/2"
      parameters:nil
+     headers:nil
      progress:nil
      success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
          requestEndTime = CACurrentMediaTime();
          [requestExpectation fulfill];
      }
      failure:nil];
-    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
+    [self waitForExpectationsWithCommonTimeout];
     XCTAssertTrue((indicatorVisbleTime - requestStartTime) > self.networkActivityIndicatorManager.activationDelay);
     XCTAssertTrue((indicatorHiddenTime - requestEndTime) > self.networkActivityIndicatorManager.completionDelay);
 }
@@ -157,6 +161,7 @@
     [self.sessionManager
      GET:@"/delay/4"
      parameters:nil
+     headers:nil
      progress:nil
      success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
          [requestExpectation fulfill];
@@ -167,6 +172,7 @@
     [self.sessionManager
      GET:@"/delay/2"
      parameters:nil
+     headers:nil
      progress:nil
      success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
 
@@ -174,7 +180,7 @@
      }
      failure:nil];
 
-    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
+    [self waitForExpectationsWithCommonTimeout];
 
 }
 
